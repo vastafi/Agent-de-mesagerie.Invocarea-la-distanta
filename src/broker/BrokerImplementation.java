@@ -1,14 +1,13 @@
 package broker;
 
-import utility.Constants;
-import utility.DataParserManager;
-import utility.Letter;
-import utility.Receiver;
+import com.google.gson.Gson;
+import utility.*;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.*;
@@ -56,10 +55,8 @@ public class BrokerImplementation implements broker.BrokerSocket {
             try {
                 inputStream = Objects.requireNonNull(finalConnectionSocket).getInputStream();
                 BufferedReader receiveRead = new BufferedReader(new InputStreamReader(inputStream));
-                String partlyTransData;
-                while (!(partlyTransData = receiveRead.readLine()).isEmpty()) {
-                    result.append(partlyTransData.trim());
-                }
+                String partlyTransData = receiveRead.readLine().trim();
+                result.append(partlyTransData);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -68,8 +65,7 @@ public class BrokerImplementation implements broker.BrokerSocket {
             String answer = "Valid";
             System.out.println("Data has been received from buffer");
             System.out.println(message);
-            DataParserManager xml = new DataParserManager(message);
-            if (message.length() >= 9 && message.startsWith("Connect ")) {
+            if (message.length() >= 9 && message.startsWith("connect ")) {
                 String name = message.substring(8);
                 System.out.println("** " + name + " parsed to be connected");
                 receiverList.add(new Receiver(finalConnectionSocket, name));
@@ -78,10 +74,11 @@ public class BrokerImplementation implements broker.BrokerSocket {
                 String name = message.substring(11);
                 System.out.println("Parsed receiver: " + name + " to be disconnected");
                 letterList.add(new Letter(name, "disconnect\n"));
-            } else if (xml.isXML()) {
+            } else if (message.startsWith("{")) {
+                Payload payload = new Gson().fromJson(message, Payload.class);
                 System.out.println("Parsed data");
-                String msg = xml.getMessage();
-                List<String> rec = xml.getReceivers();
+                String msg = payload.getMessage();
+                List<String> rec = payload.getTopic();
                 System.out.println("Receivers : " + rec);
                 for (String s : rec) letterList.add(new Letter(s, msg + "\n"));
             } else {
@@ -147,9 +144,10 @@ public class BrokerImplementation implements broker.BrokerSocket {
             }
         };
         Runnable r = () -> {
-            for (int i = 0; i < letterList.size(); i++) {
-                int finalI = i;
-                receiverList.forEach(a -> receiverLetterMatch.accept(a, letterList.get(finalI)));
+            for (Letter letter : letterList) {
+                for (Receiver receiver : receiverList) {
+                    receiverLetterMatch.accept(receiver, letter);
+                }
             }
             letterList.removeIf(Letter::isSent);
             receiverList.removeIf(Receiver::isConnected);

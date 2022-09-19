@@ -25,14 +25,16 @@ public class Subscriber {
         System.out.println("Input \"connect\" command to be connected to broker");
 
         command = bufferedReader.readLine();
+        System.out.println(command);
         while (true)
-            if (command.equals("Connect")) {
+            if (command.equals("connect")) {
                 message = command + " " + name + "\n";
                 brokerSocket.writeAsync(message);
                 System.out.println("Connected to broker");
                 break;
-            } else
+            } else {
                 System.out.println("No connection");
+            }
 
         Runnable r = new SubscriberReaderThread(brokerSocket);
         new Thread(r).start();
@@ -40,6 +42,7 @@ public class Subscriber {
 
         while (true) {
             command = bufferedReader.readLine();
+            System.out.println(command);
             if (command.equals("Disconnect")) {
                 try {
                     Thread.sleep(2000);

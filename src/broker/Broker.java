@@ -2,7 +2,7 @@ package broker;
 
 public class Broker {
     public static void main(String[] args) {
-        System.out.println("Brocker");
+        System.out.println("Broker");
 
         BrokerSocket broker = new BrokerImplementation();
         String msg;
