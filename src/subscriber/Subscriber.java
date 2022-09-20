@@ -19,7 +19,7 @@ public class Subscriber {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         socket = new Socket(Constants.HOSTNAME, Constants.PORT);
 
-        System.out.println("Input your name: ");
+        System.out.println("Input your topic: ");
         name = bufferedReader.readLine();
         BrokerSocket brokerSocket = new TransportService(socket);
         System.out.println("Input \"connect\" command to be connected to broker");

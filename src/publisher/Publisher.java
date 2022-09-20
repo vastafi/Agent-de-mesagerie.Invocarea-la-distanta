@@ -35,8 +35,8 @@ public class Publisher {
             System.out.println("Input the message: ");
             message = bufferedReader.readLine();
             try {
-                message = formXMLMessage(message, receivers);
-                System.out.println("Serialized data in XML: ");
+                message = formJSONMessage(message, receivers);
+                System.out.println("Serialized data in JSON: ");
                 System.out.println(message);
                 BrokerSocket readWrite = new TransportService(socket);
                 readWrite.writeAsync(message);
@@ -49,7 +49,7 @@ public class Publisher {
             }
                    }
             }
-    static String formXMLMessage(String message, List<String> rec) throws ParserConfigurationException, TransformerException {
+    static String formJSONMessage(String message, List<String> rec) throws ParserConfigurationException, TransformerException {
         Payload payload = new Payload(rec,message);
         String payloadGson = new Gson().toJson(payload);
         return payloadGson;
