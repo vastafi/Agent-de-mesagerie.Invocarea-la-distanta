@@ -1,19 +1,22 @@
 package subscriber;
 
 import broker.BrokerSocket;
-import utility.Constants;
-import utility.TransportService;
+import utility.*;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class Subscriber {
-    public static void main(String[] a) throws IOException {
+    public static void main(String[] a) throws IOException, ParserConfigurationException, TransformerException {
         Socket socket;
         String name;
-        String message;
         String command;
 
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
@@ -28,8 +31,7 @@ public class Subscriber {
         System.out.println(command);
         while (true)
             if (command.equals("connect")) {
-                message = command + " " + name + "\n";
-                brokerSocket.writeAsync(message);
+                brokerSocket.writeAsync(Helpers.formJSONMessage(command, MessageTypes.CONNECT, Collections.singletonList(name)));
                 System.out.println("Connected to broker");
                 break;
             } else {
@@ -51,9 +53,10 @@ public class Subscriber {
                 }
                 socket = new Socket(Constants.HOSTNAME, Constants.PORT);
                 brokerSocket = new TransportService(socket);
-                brokerSocket.writeAsync(command + " " + name + "\n");
+                brokerSocket.writeAsync(Helpers.formJSONMessage(command, MessageTypes.CONNECT, Collections.singletonList(name)));
                 break;
             }
         }
+
     }
 }

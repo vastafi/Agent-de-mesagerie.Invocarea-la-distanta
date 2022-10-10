@@ -6,10 +6,7 @@ import utility.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -17,12 +14,12 @@ import java.util.function.Consumer;
 public class BrokerImplementation implements broker.BrokerSocket {
 
     public ServerSocket serverSocket;
-    private List<Letter> letterList;
-    private List<Receiver> receiverList;
+    private Queue<Letter> letterList;
+    private Queue<Receiver> receiverList;
 
     public BrokerImplementation() {
-        letterList = new ArrayList<>();
-        receiverList = new ArrayList<>();
+        letterList = new ConcurrentLinkedQueue<>();
+        receiverList = new ConcurrentLinkedQueue<>();
         try {
             serverSocket = new ServerSocket(Constants.PORT);
         } catch (IOException e) {
@@ -65,17 +62,15 @@ public class BrokerImplementation implements broker.BrokerSocket {
             String answer = "Valid";
             System.out.println("Data has been received from buffer");
             System.out.println(message);
-            if (message.length() >= 9 && message.startsWith("connect ")) {
-                String name = message.substring(8);
+            Payload payload = new Gson().fromJson(message, Payload.class);
+            String name = payload.getTopic().get(0);
+            if (payload.getType() == MessageTypes.CONNECT) {
                 System.out.println("** " + name + " parsed to be connected");
                 receiverList.add(new Receiver(finalConnectionSocket, name));
-
-            } else if (message.length() >= 12 && message.startsWith("disconnect ")) {
-                String name = message.substring(11);
+            } else if (payload.getType() == MessageTypes.DISCONNECT) {
                 System.out.println("Parsed receiver: " + name + " to be disconnected");
                 letterList.add(new Letter(name, "disconnect\n"));
-            } else if (message.startsWith("{")) {
-                Payload payload = new Gson().fromJson(message, Payload.class);
+            } else if (payload.getType() == MessageTypes.MESSAGE) {
                 System.out.println("Parsed data");
                 String msg = payload.getMessage();
                 List<String> rec = payload.getTopic();

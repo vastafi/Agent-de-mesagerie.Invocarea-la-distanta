@@ -2,9 +2,7 @@ package publisher;
 
 import broker.BrokerSocket;
 import com.google.gson.Gson;
-import utility.Constants;
-import utility.Payload;
-import utility.TransportService;
+import utility.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -35,7 +33,7 @@ public class Publisher {
             System.out.println("Input the message: ");
             message = bufferedReader.readLine();
             try {
-                message = formJSONMessage(message, receivers);
+                message = Helpers.formJSONMessage(message, MessageTypes.MESSAGE, receivers);
                 System.out.println("Serialized data in JSON: ");
                 System.out.println(message);
                 BrokerSocket readWrite = new TransportService(socket);
@@ -49,9 +47,4 @@ public class Publisher {
             }
                    }
             }
-    static String formJSONMessage(String message, List<String> rec) throws ParserConfigurationException, TransformerException {
-        Payload payload = new Payload(rec,message);
-        String payloadGson = new Gson().toJson(payload);
-        return payloadGson;
-    }
 }

@@ -1,29 +1,20 @@
 package utility;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
+@Getter
+@Setter
 public class Payload {
     private List<String> topic;
+    private MessageTypes type;
     private String message;
 
-    public Payload(List<String> topic, String message) {
+    public Payload(List<String> topic, MessageTypes type, String message) {
         this.topic = topic;
-        this.message = message;
-    }
-
-    public List<String> getTopic() {
-        return topic;
-    }
-
-    public void setTopic(List<String> topic) {
-        this.topic = topic;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
+        this.type = type;
         this.message = message;
     }
 
@@ -31,6 +22,7 @@ public class Payload {
     public String toString() {
         return "Payload{" +
                 "topic=" + topic +
+                ", type='" + type + '\'' +
                 ", message='" + message + '\'' +
                 '}';
     }
